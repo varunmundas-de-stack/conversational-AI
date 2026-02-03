@@ -3,7 +3,10 @@
     "allow": [
       "Bash(chmod:*)",
       "Bash(tree:*)",
-      "Read(//Users/varunmundas/Desktop/Conversation_AI_Project/**)"
+      "Read(//Users/varunmundas/Desktop/Conversation_AI_Project/**)",
+      "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(security delete-internet-password:*)"
     ]
   }
 }
