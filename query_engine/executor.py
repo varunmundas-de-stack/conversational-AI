@@ -1,0 +1,107 @@
+"""
+Query Executor - Executes SQL queries against DuckDB
+"""
+import duckdb
+import time
+from typing import List, Dict, Any
+from pathlib import Path
+from semantic_layer.models import QueryResult
+
+
+class QueryExecutor:
+    """Execute SQL queries and return results"""
+
+    def __init__(self, db_path: str):
+        self.db_path = Path(db_path)
+        self.conn = None
+
+    def connect(self):
+        """Connect to DuckDB database"""
+        if not self.db_path.exists():
+            raise FileNotFoundError(f"Database not found: {self.db_path}")
+
+        self.conn = duckdb.connect(str(self.db_path), read_only=True)
+
+    def disconnect(self):
+        """Close database connection"""
+        if self.conn:
+            self.conn.close()
+            self.conn = None
+
+    def execute(self, sql: str) -> QueryResult:
+        """
+        Execute SQL query and return results
+        """
+        if not self.conn:
+            self.connect()
+
+        start_time = time.time()
+
+        try:
+            # Execute query
+            result = self.conn.execute(sql)
+
+            # Fetch all results
+            rows = result.fetchall()
+            columns = [desc[0] for desc in result.description]
+
+            # Convert to list of dicts
+            data = []
+            for row in rows:
+                data.append(dict(zip(columns, row)))
+
+            execution_time = (time.time() - start_time) * 1000  # ms
+
+            return QueryResult(
+                data=data,
+                columns=columns,
+                row_count=len(data),
+                sql_query=sql,
+                execution_time_ms=round(execution_time, 2)
+            )
+
+        except Exception as e:
+            raise Exception(f"Query execution failed: {str(e)}\nSQL: {sql}")
+
+    def get_table_info(self, table_name: str) -> Dict[str, Any]:
+        """Get information about a table"""
+        if not self.conn:
+            self.connect()
+
+        # Get row count
+        count_result = self.conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()
+        row_count = count_result[0] if count_result else 0
+
+        # Get column info
+        columns_result = self.conn.execute(f"DESCRIBE {table_name}").fetchall()
+        columns = [
+            {
+                'name': col[0],
+                'type': col[1],
+                'null': col[2]
+            }
+            for col in columns_result
+        ]
+
+        return {
+            'table_name': table_name,
+            'row_count': row_count,
+            'columns': columns
+        }
+
+    def list_tables(self) -> List[str]:
+        """List all tables in the database"""
+        if not self.conn:
+            self.connect()
+
+        result = self.conn.execute("SHOW TABLES").fetchall()
+        return [row[0] for row in result]
+
+    def __enter__(self):
+        """Context manager entry"""
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit"""
+        self.disconnect()

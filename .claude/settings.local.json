@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Read(//Users/varunmundas/Desktop/Conversation_AI_Project/**)"
+    ]
+  }
+}
