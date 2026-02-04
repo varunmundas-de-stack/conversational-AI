@@ -6,7 +6,7 @@
 
 ## Table of Contents
 
-1. [Executive Summary](#executive-summary)
+1. [Summary](#executive-summary)
 2. [Why NOT Use LLMs for SQL Generation?](#why-not-use-llms-for-sql-generation)
 3. [Solution Architecture](#solution-architecture)
 4. [Core Components](#core-components)
