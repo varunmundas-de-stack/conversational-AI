@@ -18,7 +18,7 @@
 
 ---
 
-## Executive Summary
+## Summary
 
 This document presents a **production-ready approach** for building Conversational AI systems over SQL/OLAP databases **without using LLMs to generate SQL queries**. 
 
